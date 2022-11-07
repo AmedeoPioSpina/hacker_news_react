@@ -1,17 +1,51 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React, { useEffect, useState } from "react";
+import ReactDOM from "react-dom/client";
+import axios from "axios";
+import News from "./news";
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+const HackerNews = () => {
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+    const [articlesInfo, setArticlesInfo] = useState([])
+
+    const newsIdFetch = async() => {
+        const result = await axios.get("https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty")
+        .then((res) => res.data.slice(0,10))
+        .catch((err) => alert(err));
+        return result;
+    }
+
+    const newsFetch = async(id) => {
+        const result = await axios.get(`https://hacker-news.firebaseio.com/v0/item/${id}.json?print=pretty`)
+        .then((res) => res.data)
+        .catch((err) => alert(err));
+        return result;
+    }
+
+
+    useEffect(async() => {
+        const newsId = await newsIdFetch();
+        newsId.map(async(element) => {
+            const newsList = await newsFetch(element);
+            setArticlesInfo(prev => [...prev, newsList]);
+        })
+    },[])
+
+    //Da levare alla fine vvv
+
+    useEffect(() => {
+        console.log(articlesInfo)
+    },[articlesInfo])
+
+    return(
+        <div className="hacker-news">
+            {
+                articlesInfo.map((element, index)=>{
+                    return <News key={index} singleArticleInfo={element}/>
+                })
+            }
+        </div>
+    )
+}
+
+const root = ReactDOM.createRoot(document.querySelector("#root"));
+root.render(<HackerNews/>)
