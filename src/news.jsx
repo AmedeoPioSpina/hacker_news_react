@@ -1,28 +1,28 @@
 import { unixTimeConverter } from "./unixTimeConverter";
 
-const News = ({singleArticleInfo}) => {
+const News = ({articleInfo}) => {
     return(
         <div className="article">
             <h3>
                 {
-                    singleArticleInfo.title
+                    articleInfo.title
                 }
             </h3>
             <p>
                 <a href="#">
                     {
-                        singleArticleInfo.url
+                        articleInfo.url
                     }
                 </a>
             </p>
             <div className="author">
                 {
-                    "By " + singleArticleInfo.by + " - "
+                    "By " + articleInfo.by + " - "
                 }
             </div>
             <div className="publication-date">
                     {
-                        unixTimeConverter(singleArticleInfo.time)
+                        unixTimeConverter(articleInfo.time)
                     }
             </div>
         </div>

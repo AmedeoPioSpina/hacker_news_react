@@ -10,7 +10,6 @@ const HackerNews = () => {
     const [inputValue, setInputValue] = useState("");
     const [filtredInfo, setFiltredInfo] = useState([]);
     const [articlesInfo, setArticlesInfo] = useState([]);
-    const [newslist, setNewsList] = useState([]);
 
     const newsIdFetch = async() => {
         const result = await axios.get("https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty")
@@ -19,49 +18,25 @@ const HackerNews = () => {
         return result;
     }
 
-    const newsFetch = async(id) => {
-        const result = await axios.get(`https://hacker-news.firebaseio.com/v0/item/${id}.json?print=pretty`)
-        .then((res) => res.data)
-        .catch((err) => alert(err));
-        return result;
-    }
-
-
-    useEffect(async() => {
-        const newsId = await newsIdFetch();
-        const pippo = newsId.map(async(element) => {
-            const newsList = await newsFetch(element);
-            setArticlesInfo(prev => [...prev, newsList]);
-        })
+    useEffect(() => {
+        (async() => {
+            const newsList = await newsIdFetch().then(async(idList) => {
+                let result = [];
+                for(let i = 0; i<idList.length; i++){
+                    const news = await axios.get(`https://hacker-news.firebaseio.com/v0/item/${idList[i]}.json?print=pretty`)
+                    .then((res)=> res.data)
+                    .catch((err) => alert(err));
+                    result = [...result, news];
+                }
+                return result;
+            });
+            setArticlesInfo([...newsList]);
+        })();
     },[])
     
     useEffect(() => {
         setFiltredInfo([...articlesInfo]);
     }, [articlesInfo])
-
-    useEffect(() => {
-        if(inputValue!==""){
-            let filtredResult = [];
-            articlesInfo.map(element => {
-                if(element.title.search(inputValue) !== -1 ){
-                    filtredResult = [...filtredResult, element];
-                }
-            })
-            setFiltredInfo(...filtredResult);
-            console.log(inputValue)
-        }
-    }, [inputValue])
-
-    useEffect(()=>{
-        filtredInfo.map((element, index)=>{
-            setNewsList(prev => prev.push(<News key={index} singleArticleInfo={element}/>))
-        })
-    },[filtredInfo])
-
-    useEffect(() => {
-        console.log(articlesInfo)
-        console.log(filtredInfo)
-    },[filtredInfo])
 
     return(
         <div className="hacker-news">
@@ -70,8 +45,8 @@ const HackerNews = () => {
 
             <div className="news-view">
                 {
-                    newslist.map(element => {
-                        return element
+                    filtredInfo.filter((item) => item.title.toLowerCase().includes(inputValue.toLowerCase())).map((element, index) => {
+                        return <News key={index} articleInfo={element}/>
                     })  
                 }
             </div>
